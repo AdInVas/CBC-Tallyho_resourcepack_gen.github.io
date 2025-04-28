@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload & Stamp Overlay with Ballistics</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    * {background-color: #333; color: blanchedalmond;}
+    body { font-family: sans-serif; margin: 2rem;}
+    canvas { border: dashed darkblue 4px; display: block; margin-top: 1rem; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1rem; }
+    label { display: block; margin-top: 1rem; }
+    #imageOptions{float: left; padding-left: 100px;}
+    #CannonData{float: left;}
+  </style>
+</head>
+<body>
+  <h1>:3</h1>
+  <div id="CannonData">
+    <h2>Cannon Data</h2>
+    <label>
+      Cannon m/s:
+      <input type="number" id="cannonSpeed" step="any" value="160"/>
+    </label>
+    <label>
+      Round gravity:
+      <input type="number" id="gravityInput" value="0.05"/>
+    </label>
+    <label>
+      Round drag:
+      <input type="number" id="dragInput" value="0.99"/>
+    </label>
+    <label>
+      Sight position difference in blocks:
+      <input type="number" id="sightMove" step="any" />
+    </label>
+    <label>
+      Barrel Length From Scope block:
+      <input type="number" id="barrelLength" value="1" step="any" />
+    </label>
+    <hr>
+      <h2>Advanced</h2>
+    <label>
+      Scope FOV (°):
+      <input type="number" id="scopeFov" value="10" step="any"/>
+    </label>
+  </div>
+  <div id="imageOptions">
+    <h2>Image Input</h2>
+    <label>
+      Base Image:
+      <input type="file" id="baseInput" accept="image/*" />
+    </label>
+    <label>
+      Overlay Image:
+      <input type="file" id="overlayInput" accept="image/*" />
+    </label>
+    <label>
+      Range Increment:
+      <input type="number" id="rangeIncrement" value="50" step="any" />
+    </label>
+    <label>
+      Max Range:
+      <input type="number" id="maxRange" value="400" step="any" />
+    </label>
+      <hr>
+      <h2>Misc.</h2>
+      <label>
+          Range Numbers:<input type="checkbox" id="rangeNumbers">
+      </label>
+      <label>
+        Color:
+        <input type="color" id="fontColor" disabled hexa>
+      </label>
+      <label>
+        Opacity:
+        <input type="range" id="fontOpacity" disabled min="0" max="255" step="1" value="255">
+      </label>
+      <label>
+        Font:
+        <select id="fontSelect" disabled>
+          <option value="monospace">Monospace</option>
+          <option value="Impact">Impact</option>
+          <option value="Arial">Arial</option>
+          <option value="Consolas">Consolas</option>
+        </select>
+      </label>
+      <label>
+        Font Size:
+        <input type="number" id="fontSize" value="12" disabled>
+      </label>
+      <label>
+        Bold:
+        <input type="checkbox" id="fontBold">
+      </label>
+      <label>
+        Print every:
+        <input type="number" id="skipNumbers" min="1" step="1"> number.
+      </label>
+  </div>
+  <div style="float: left; clear: both;">
+  <canvas id="canvas"></canvas>
+  <button id="stampBtn" disabled>Stamp Overlay</button>
+  <button id="downloadBtn" disabled>Download Result</button>
+  </div>
+
+  <script>
+    // Global images
+    let baseImg, overlayImg;
+
+    // Utility functions from Projectile Pitch Calculator
+    function rad(deg) {
+      return deg * Math.PI / 180;
+    }
+
+    function timeInAir(yProjectile, yTarget, projectileYVelocity, gravity = 0.05, drag = 0.99, maxSteps = 1e6) {
+      let t = 0;
+      let tBelow = Number.MAX_SAFE_INTEGER;
+      let y0 = yProjectile;
+      let Vy = projectileYVelocity;
+
+      if (y0 < yTarget) {
+        let prevY;
+        while (t < maxSteps) {
+          prevY = y0;
+          y0 += Vy;
+          Vy = drag * Vy - gravity;
+          t++;
+          if (y0 > yTarget) { tBelow = t - 1; break; }
+          if (y0 - prevY < 0) { return [-1, -1]; }
+        }
+      }
+
+      while (t < maxSteps) {
+        y0 += Vy;
+        Vy = drag * Vy - gravity;
+        t++;
+        if (y0 <= yTarget) { return [tBelow, t]; }
+      }
+
+      return [tBelow, -1];
+    }
+
+    function tryPitch(pitchDeg, initialSpeed, barrelLength, horizontalDist, gravity = 0.05, drag = 0.99) {
+      const θ = rad(pitchDeg);
+      const Vw = Math.cos(θ) * initialSpeed;
+      const Vy = Math.sin(θ) * initialSpeed;
+      const xBarrel = barrelLength * Math.cos(θ);
+      if (Vw === 0) return null;
+
+      const part = 1 - (horizontalDist - xBarrel) / (100 * Vw);
+      if (part <= 0) return null;
+      const tH = Math.abs(Math.log(part) / Math.log(drag));
+
+      const [tBelow, tAbove] = timeInAir(0, 0, Vy, gravity, drag);
+      if (tBelow < 0) return null;
+
+      const d1 = Math.abs(tH - tBelow);
+      const d2 = Math.abs(tH - tAbove);
+      const dT = Math.min(d1, d2);
+
+      return { pitch: pitchDeg, deltaT: dT };
+    }
+
+    function calculateBestPitch(distance, speed, length, gravity, drag) {
+      let best = null;
+      for (let angle = -30; angle <= 60; angle += 0.1) {
+        const res = tryPitch(angle, speed, length, distance, gravity, drag);
+        if (res && (!best || res.deltaT < best.deltaT)) {
+          best = res;
+        }
+      }
+      return best;
+    }
+
+    // DOM elements
+    const baseInput    = document.getElementById('baseInput');
+    const overlayInput = document.getElementById('overlayInput');
+    const canvas       = document.getElementById('canvas');
+    const ctx          = canvas.getContext('2d');
+    const stampBtn     = document.getElementById('stampBtn');
+    const downloadBtn  = document.getElementById('downloadBtn');
+    const rangeNumbers = document.getElementById("rangeNumbers");
+    const fontBold = document.getElementById('fontBold');
+    const overlaySize = {}
+    // Image loading
+    baseInput.addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      baseImg = new Image();
+      baseImg.onload = () => {
+        canvas.width = baseImg.width;
+        canvas.height = baseImg.height;
+        ctx.drawImage(baseImg, 0, 0);
+      };
+      downloadBtn.disabled = false;
+      baseImg.src = URL.createObjectURL(file);
+    });
+
+    overlayInput.addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      overlayImg = new Image();
+      overlayImg.onload = () => {
+        stampBtn.disabled = false;
+
+        overlaySize.width =  overlayImg.width
+        overlaySize.height = overlayImg.height
+      };
+      overlayImg.src = URL.createObjectURL(file);
+    });
+
+    stampBtn.addEventListener('click', () => {
+      // Read inputs
+      const speed    = parseFloat(document.getElementById('cannonSpeed').value)/20;
+      const gravity  = parseFloat(document.getElementById('gravityInput').value);
+      const drag     = parseFloat(document.getElementById('dragInput').value);
+      const sightMove= parseFloat(document.getElementById('sightMove').value);
+      const barrelLen= parseFloat(document.getElementById('barrelLength').value);
+      const rangeInc = parseFloat(document.getElementById('rangeIncrement').value);
+      const maxRange = parseFloat(document.getElementById('maxRange').value);
+      const fovDeg   = parseFloat(document.getElementById('scopeFov').value);
+      const fontStyle = document.getElementById("fontSelect").value;
+      const fontSize = parseInt(document.getElementById('fontSize').value)
+      const fontColor = document.getElementById('fontColor')
+      const fontOpacity = document.getElementById('fontOpacity')
+      const skip = document.getElementById("skipNumbers")
+
+      // Precompute FOV tangent
+      const fovRad  = fovDeg * Math.PI/180;
+      const fovRadVert = fovDeg * Math.PI/180;
+
+      // your canvas aspect ratio:
+      const aspect = canvas.width / canvas.height;
+
+      // derive horizontal FOV in radians:
+      const fovRadHorz = 2 * Math.atan( Math.tan(fovRadVert/2) * aspect );
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(baseImg, 0, 0);
+
+      for (let distance = rangeInc; distance <= maxRange; distance += rangeInc) {
+        // Ballistics: find best pitch angle
+        const best = calculateBestPitch(distance, speed, barrelLen, gravity, drag);
+        if (!best) continue;
+        const pitchRad = best.pitch * Math.PI/180;
+
+        // Compute percentage offsets
+        const aspect = canvas.width / canvas.height;
+        const offsetX   = Math.atan2(sightMove, distance);
+        const pctY = pitchRad / fovRadVert;
+        var pctX = offsetX  / fovRadHorz
+        // To pixel coordinates
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        if(isNaN(pctX)){
+          pctX= 0 
+        }
+        const x  = Math.floor(((cx + pctX * (canvas.width / 2)) -overlaySize.width/2));
+        const y  = Math.floor(((cy + pctY * (canvas.height / 2)) -overlaySize.height/2));
+        ctx.drawImage(overlayImg, x, y);
+        console.log()
+        if(distance%(rangeInc*parseInt(skip.value))==0){
+        if(rangeNumbers.checked){
+          ctx.font = fontSize+"px "+fontStyle
+          if(fontBold.checked){
+            ctx.font = "bold "+ctx.font
+          }
+          var opac = fontOpacity.value
+          ctx.fillStyle = fontColor.value + Math.abs(opac).toString(16)
+          
+          console.log()
+          ctx.fillText(distance,x+overlaySize.width+1,y+(overlaySize.height));
+          }
+        }
+      }
+
+      // Enable download
+    });
+
+    rangeNumbers.addEventListener('change',()=>{
+        if(rangeNumbers.checked){
+          document.getElementById("fontColor").disabled = false
+          document.getElementById("fontSelect").disabled = false
+          document.getElementById("fontSize").disabled = false
+          document.getElementById("fontOpacity").disabled = false
+        }else{
+          document.getElementById("fontColor").disabled = true
+          document.getElementById("fontSelect").disabled = true
+          document.getElementById("fontSize").disabled = true
+          document.getElementById("fontOpacity").disabled = true
+        }
+    })
+
+    downloadBtn.onclick = () => {
+      const zip = new JSZip();
+
+      const packMeta = {
+        pack: {
+          pack_format: 15,
+          description: "Automated Scope pack"
+        }
+      };
+      zip.file('pack.mcmeta', JSON.stringify(packMeta, null, 2));
+
+      canvas.toBlob(blob => {
+        if (!blob) {
+          alert('Failed to export canvas.');
+          return;
+        }
+        const imgPath = 'assets/tallyho/textures/misc/scope.png';
+        zip.file(imgPath, blob, { binary: true });
+
+        // 4) Generate the zip and trigger download
+        zip.generateAsync({ type: 'blob' }).then(content => {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(content);
+          link.download = 'file.zip';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+        });
+
+      }, 'image/png');
+      };
+  </script>
+</body>
+</html>
