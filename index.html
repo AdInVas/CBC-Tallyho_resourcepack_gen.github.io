@@ -189,6 +189,13 @@
     const rangeNumbers = document.getElementById("rangeNumbers");
     const fontBold = document.getElementById('fontBold');
     const overlaySize = {}
+    //Font loading
+    var fontload = document.getElementById("fontSelect").options;
+    for(var i=0;i<fontload.length;i++){
+      console.log("1px "+fontload[i].value)
+      ctx.font = "1px "+fontload[i].value
+      ctx.fillText("load",10,10);
+    }
     // Image loading
     baseInput.addEventListener('change', e => {
       const file = e.target.files[0]; if (!file) return;
