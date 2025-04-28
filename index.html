@@ -204,6 +204,16 @@
     const rangeNumbers = document.getElementById("rangeNumbers");
     const fontBold = document.getElementById('fontBold');
     const overlaySize = {}
+
+    let genericImg = new Image()
+    genericImg.src = "GenericScope.png"
+    baseImg = genericImg
+    baseImg.onload = () => {
+        canvas.width = baseImg.width;
+        canvas.height = baseImg.height;
+        ctx.drawImage(baseImg, 0, 0);
+      };
+    downloadBtn.disabled = false;
     //Font loading
     var fontload = document.getElementById("fontSelect").options;
     for(var i=0;i<fontload.length;i++){
