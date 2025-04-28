@@ -214,6 +214,14 @@
         ctx.drawImage(baseImg, 0, 0);
       };
     downloadBtn.disabled = false;
+
+    overlayImg = new Image()
+    overlayImg.src= "GenericMarker.png"
+      overlayImg.onload = () => {
+        stampBtn.disabled = false;
+        overlaySize.width =  overlayImg.width
+        overlaySize.height = overlayImg.height
+      };
     //Font loading
     var fontload = document.getElementById("fontSelect").options;
     for(var i=0;i<fontload.length;i++){
