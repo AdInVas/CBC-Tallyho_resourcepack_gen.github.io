@@ -10,7 +10,15 @@
       font-family: 'Minecraft';
       src: url('fonts/MinecraftRegular-Bmg3.otf');
     }
-    * {background-color: #333; color: blanchedalmond;}
+    @font-face {
+      font-family: 'Digital7';
+      src: url('fonts/digital-7.ttf');
+    }
+    @font-face {
+      font-family: 'OCR';
+      src: url('fonts/OCR A Extended.ttf');
+    }
+    * {background-color: #333; color: rgb(212, 246, 255);}
     body { font-family: sans-serif; margin: 2rem;}
     canvas { border: dashed darkblue 4px; display: block; margin-top: 1rem; }
     button { margin-top: 1rem; padding: 0.5rem 1rem; font-size: 1rem; }
@@ -89,6 +97,8 @@
           <option value="Arial">Arial</option>
           <option value="Consolas">Consolas</option>
           <option value='Minecraft'>Minecraft</option>
+          <option value='Digital7'>Digital7</option>
+          <option value='OCR'>OCR</option>
         </select>
       </label>
       <label>
