@@ -95,7 +95,7 @@
     </label>
     <label>
       Round drag:
-      <input type="number" id="dragInput" value="0.99"/>
+      <input type="number" id="dragInput" value="0.01"/>
     </label>
     <label>
       Sight position difference in blocks:
@@ -331,7 +331,7 @@ for (i = 0; i < coll.length; i++) {
       // Read inputs
       const speed    = parseFloat(document.getElementById('cannonSpeed').value)/20;
       const gravity  = parseFloat(document.getElementById('gravityInput').value);
-      const drag     = parseFloat(document.getElementById('dragInput').value);
+      const drag     = 1-parseFloat(document.getElementById('dragInput').value);
       const sightMove= parseFloat(document.getElementById('sightMove').value);
       const barrelLen= parseFloat(document.getElementById('barrelLength').value);
       const rangeInc = parseFloat(document.getElementById('rangeIncrement').value);
