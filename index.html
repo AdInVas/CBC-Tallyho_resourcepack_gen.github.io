@@ -544,7 +544,7 @@ for (i = 0; i < coll.length; i++) {
 
     function calculateBestPitch(distance, speed, length, gravity, drag) {
       let best = null;
-      for (let angle = -30; angle <= 60; angle += 0.05) {
+      for (let angle = -30; angle <= 60; angle += 0.1) {
         const res = tryPitch(angle, speed, length, distance, gravity, drag);
         if (res && (!best || res.deltaT < best.deltaT)) {
           best = res;
