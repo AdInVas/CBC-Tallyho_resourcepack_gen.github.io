@@ -450,8 +450,8 @@
         <input type="number" id="skipNumbers" min="1" step="1" value="1"> number.
       </label>
       <label>
-        Flipped Side:
-        <input type="checkbox" id="Flipped">
+        Pixel offset:
+        <input type="number" id="offset" step="1">
       </label>
   </div>
   <div style="float: left; clear: both;">
@@ -628,7 +628,7 @@ for (i = 0; i < coll.length; i++) {
       const fontColor = document.getElementById('fontColor')
       const fontOpacity = document.getElementById('fontOpacity')
       const skip = document.getElementById("skipNumbers")
-      const flipped = document.getElementById("Flipped")
+      const offset = parseInt(document.getElementById("Flipped").value)
 
       // Precompute FOV tangent
       const fovRad  = fovDeg * Math.PI/180;
@@ -674,11 +674,8 @@ for (i = 0; i < coll.length; i++) {
           ctx.fillStyle = fontColor.value + Math.abs(opac).toString(16)
           
           console.log()
-          if(flipped.checked){
-            ctx.fillText(distance,x-overlaySize.width-1-(Math.floor(1.5*fontSize)),y+(overlaySize.height));
-          }else{
-            ctx.fillText(distance,x+overlaySize.width+1,y+(overlaySize.height));
-          }
+            ctx.fillText(distance,x+overlaySize.width+1+offset,y+(overlaySize.height));
+
           }
         }
       }
