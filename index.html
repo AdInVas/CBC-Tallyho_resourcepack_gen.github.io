@@ -66,23 +66,90 @@
     <button type="button" class="collapsible">Tutorial</button>
     <div class="content">
       <h3>Cannon data setup</h3>
-      <ul>
-        <li>
-          <h4>Cannon m/s:</h4>
-          <p>
+      <ul> 
+        <li> 
+          <h4>Cannon m/s:</h4> 
+          <p> 
             This input corresponds to the speed of the projectile exiting the cannon.
             The value is in meters per second.
-            <hr>
-            <fieldset>
-            <legend><h5>Big cannons</h5></legend>
-            When using a Big cartridges look at the tooltip to get the speed.
-            If you are using Powder charges, multiply the speed one powder charge adds by the amount of powdercharges used to fire the gun.
-            </fieldset>
+          </p> 
+        </li> 
+        <li> 
+          <h4>Round Gravity:</h4> 
+          <p> 
+            This input corresponds to the gravity of the projectile.
+            The value can be read inside the data for the projectiles. 
           </p>
+        </li> 
+        <li> 
+          <h4>Round Drag:</h4>
+          <p> 
+            This input corresponds to the drag of the projectile. 
+            The value can be read inside the data for the projectiles. 
+          </p> 
+        </li> 
+        <li>
+          <h4> Sight position difference in blocks:</h4>
+          <p> 
+            This input corresponds to horizontal(to the side) distance of the scope from the gun.
+            The value is in blocks. Positive values correspond to sight to the right of the gun.
+            Negative values correspond to sight to the left of the gun.
+          </p> 
+        </li> 
+        <li> 
+          <h4> Barrel Length From Scope block:</h4> 
+          <p> 
+            This input corresponds to how fare past the scope barrel of the gun extends. 
+            The value is in blocks. 
+          </p> 
         </li>
-      </ul>
+      </ul> 
+      <hr> 
+      <h3>Advanced data setup</h3>
+      <ul> 
+        <li> 
+          <h4>Scope FOV:</h4> 
+          <p> 
+            This input corresponds to the FOV of the scope. 
+            Currently it does not need to be changed. 
+            The correct value for the Scope block is 10 
+          </p> 
+        </li> 
+      </ul> 
+      <hr> 
+      <h3>Image Input</h3> 
+      <ul> 
+        <li> 
+          <h4>Base Image:</h4> 
+          <p>
+            This input can be used if you dont want to use the default scope texture. 
+            This will change the Base image to the image provided. 
+          </p> 
+        </li> 
+        <li>
+          <h4>Overlay Image:</h4> 
+          <p> 
+            This input can be used if you dont want to use the default range marker texture.
+            This will change the marker image to the image provided.
+          </p> 
+        </li> 
+        <li>
+          <h4>Range Increment:</h4> 
+          <p> 
+            This input corresponds to range steps. 
+            Example: If Range Increment is set to 100 
+            the ranges printed will be 100,200,300,400 
+            But if Range Increment is set to 50 
+            the ranges printed will be 50,100,150,200 
+          </p> 
+        </li> 
+      </ul> 
+      <fieldset>
+        <legend><h5>Big cannons</h5></legend>
+        When using a Big cartridges look at the tooltip to get the speed.<br> 
+        If you are using Powder charges, multiply the speed one powder charge adds by the amount of powdercharges used to fire the gun. 
+      </fieldset> 
     </div>
-
   <div id="CannonData">
     <h2>Cannon Data</h2>
     <label>
