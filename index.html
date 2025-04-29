@@ -63,22 +63,6 @@
 }
 
   </style>
-  <script>
-var coll = document.getElementsByClassName("collapsible");
-var i;
-
-for (i = 0; i < coll.length; i++) {
-  coll[i].addEventListener("click", function() {
-    this.classList.toggle("active");
-    var content = this.nextElementSibling;
-    if (content.style.maxHeight){
-      content.style.maxHeight = null;
-    } else {
-      content.style.maxHeight = content.scrollHeight + "px";
-    }
-  });
-}
-  </script>
 </head>
 <body>
     <button type="button" class="collapsible">Tutorial</button>
@@ -176,7 +160,31 @@ for (i = 0; i < coll.length; i++) {
   <button id="stampBtn" disabled>Stamp Overlay</button>
   <button id="downloadBtn" disabled>Download Result</button>
   </div>
+  <script>
+  var coll = document.getElementsByClassName("collapsible");
+var i;
 
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  });
+}
+
+  </script>
+
+
+
+
+
+
+
+  
   <script>
     // Global images
     let baseImg, overlayImg;
