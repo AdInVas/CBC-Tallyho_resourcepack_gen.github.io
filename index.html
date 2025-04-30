@@ -455,7 +455,7 @@
       </label>
       <label>
         Pixel offset:
-        <input type="number" id="offset" step="1">
+        <input type="number" id="offset" step="1" value="0">
       </label>
   </div>
   <div style="float: left; clear: both;">
@@ -677,7 +677,7 @@ for (i = 0; i < coll.length; i++) {
           }
           var opac = fontOpacity.value
           ctx.fillStyle = fontColor.value + Math.abs(opac).toString(16)
-          if(!ignorehor.checked){
+          if(ignorehor.checked){
              ctx.fillText(distance,x+overlaySize.width+1+offset,y+(overlaySize.height));
           }else{
              ctx.fillText(distance,offset,y+(overlaySize.height));
