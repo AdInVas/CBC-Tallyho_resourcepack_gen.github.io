@@ -450,6 +450,10 @@
         <input type="number" id="skipNumbers" min="1" step="1" value="1"> number.
       </label>
       <label>
+        Ignore horizontal position of the markers:
+        <input type="checkbox" id="ignoreHor">
+      </label>
+      <label>
         Pixel offset:
         <input type="number" id="offset" step="1">
       </label>
@@ -629,6 +633,7 @@ for (i = 0; i < coll.length; i++) {
       const fontOpacity = document.getElementById('fontOpacity')
       const skip = document.getElementById("skipNumbers")
       const offset = parseInt(document.getElementById("offset").value)
+      const ignorehor = document.getElementById("ignoreHor")
 
       // Precompute FOV tangent
       const fovRad  = fovDeg * Math.PI/180;
@@ -672,9 +677,12 @@ for (i = 0; i < coll.length; i++) {
           }
           var opac = fontOpacity.value
           ctx.fillStyle = fontColor.value + Math.abs(opac).toString(16)
-          
-          console.log()
-            ctx.fillText(distance,x+overlaySize.width+1+offset,y+(overlaySize.height));
+          if(ignorehor.checked){
+             ctx.fillText(distance,x+overlaySize.width+1+offset,y+(overlaySize.height));
+          }else{
+             ctx.fillText(distance,overlaySize.width+1+offset,y+(overlaySize.height));
+          }
+            
 
           }
         }
